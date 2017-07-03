@@ -316,11 +316,23 @@ EOF;
         $response_body = null;
         $request = null;
 
+      echo "\n--------------------------\n";
+      echo "Endpoint: " . print_r($saml_info['endpoint'],true);
+      echo "headers: " . print_r($headers,true);
+      echo "payload: " . print_r($payload,true);
+      echo "\n--------------------------\n";
+
+
         // Now make the HTTP request.
         try {
             $request = $client->post($saml_info['endpoint'], $headers, $payload);
             $response = $request->send();
         } catch (RequestException $e) {
+
+            echo "\n--------------------------\n";
+          print_r($e->getMessage());
+          echo "\n--------------------------\n";
+
             $error_code = $e->getCode();
             if ($e instanceof BadResponseException) {
                 // Server responded. Grab the response body, if any.
