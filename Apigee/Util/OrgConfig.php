@@ -349,14 +349,30 @@ EOF;
             }
             throw $ex;
         }
-
+      
         $token_details = json_decode($response->getBody(true), true);
-        if (!is_array($token_details)
-            || !array_key_exists('access_token', $token_details)
-            || !array_key_exists('expires_in', $token_details)
-        ) {
+        $invalid_response = FALSE;
+
+        // Make sure valid JSON is returned
+        if($invalid_response == NULL) {
+          $invalid_response = TRUE;
+          $error_message = 'Invalid JSON returned.  Response body: ' . $response->getBody(true);
+        }
+        if (!is_array($token_details)) {
+            $invalid_response = TRUE;
+          $error_message = 'Response body is not an array: ' . $response->getBody(true);
+        }
+        if (!array_key_exists('access_token', $token_details)) {
+            $invalid_response = TRUE;
+          $error_message = 'Response body does not contain the acess_token attribute.  Response body: ' . $response->getBody(true);
+        }
+        if (!array_key_exists('expires_in', $token_details)) {
+            $invalid_response = TRUE;
+          $error_message = 'Response body does not contain the expires_in attribute.  Response body: ' . $response->getBody(true);
+        }
+        if($invalid_response) {
             $ex = new SamlResponseException(
-                'Invalid JSON returned from bearer token fetch',
+                'Invalid response returned from bearer token fetch: ' . $error_message,
                 0,
                 $saml_info['endpoint'],
                 $payload,
